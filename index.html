@@ -6,581 +6,1064 @@
     <title>KSC Executive Dashboard</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
+
         :root {
             --ksc-primary: #3d2817;
             --ksc-secondary: #6d5742;
             --ksc-accent: #d4c6b8;
             --ksc-light: #eee4db;
-            --bg-cream: #f5f0ea;
+            --green: #059669;
+            --amber: #f59e0b;
+            --red: #dc2626;
         }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: var(--bg-cream);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: linear-gradient(135deg, var(--ksc-light) 0%, #f5f0ea 100%);
             color: var(--ksc-primary);
+            min-height: 100vh;
+        }
+
+        /* LOGIN */
+        .login-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
             min-height: 100vh;
             padding: 2rem;
         }
-        .header {
-            background: linear-gradient(135deg, var(--ksc-primary) 0%, #2a1a0f 100%);
-            color: white;
-            padding: 2rem;
-            border-radius: 12px;
-            margin-bottom: 2rem;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+
+        .login-box {
+            background: white;
+            border-radius: 16px;
+            padding: 3rem;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
         }
+
+        .login-box h1 { font-size: 1.8rem; margin-bottom: 0.5rem; }
+        .password-hint {
+            background: #fef3c7;
+            border: 2px solid #f59e0b;
+            color: #92400e;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border: 2px solid var(--ksc-accent);
+            border-radius: 8px;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, var(--ksc-primary), #2a1a0f);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* DASHBOARD */
+        .dashboard { display: none; }
+        .dashboard.active { display: block; }
+
+        .dashboard-header {
+            background: linear-gradient(135deg, var(--ksc-primary), #2a1a0f);
+            color: white;
+            padding: 1.5rem 2rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
         .header-top {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem;
         }
-        .logo-section { display: flex; align-items: center; gap: 1rem; }
-        .logo-circle {
-            width: 56px; height: 56px; background: white; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-weight: 300; font-size: 1rem; color: var(--ksc-primary); letter-spacing: 3px;
+
+        .header-title h1 { font-size: 1.5rem; }
+        .header-title p { font-size: 0.9rem; opacity: 0.9; margin-top: 0.3rem; }
+
+        .logout-btn {
+            background: rgba(255,255,255,0.15);
+            color: white;
+            border: none;
+            padding: 0.5rem 1.5rem;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
         }
-        h1 { font-size: 2rem; font-weight: 600; }
-        .subtitle { font-size: 1rem; opacity: 0.9; margin-top: 0.5rem; }
-        .filters {
+
+        .dashboard-content {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* FILTER BAR */
+        .filter-bar {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            margin-bottom: 2rem;
             display: flex;
             gap: 1rem;
+            align-items: center;
             flex-wrap: wrap;
         }
-        .filter-select {
-            padding: 0.625rem 1.25rem;
-            border: 1px solid rgba(255,255,255,0.3);
-            border-radius: 6px;
-            font-size: 0.875rem;
-            background: rgba(255,255,255,0.1);
-            color: white;
-            cursor: pointer;
-        }
-        .filter-select option { color: var(--ksc-primary); }
-        .btn {
-            padding: 0.625rem 1.25rem;
-            border: none;
-            border-radius: 6px;
-            font-size: 0.875rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .btn-light {
-            background: white;
-            color: var(--ksc-primary);
-        }
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-        .stat-card {
-            background: white;
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        }
-        .stat-label {
-            font-size: 0.875rem;
-            color: var(--ksc-secondary);
-            margin-bottom: 0.5rem;
-        }
-        .stat-value {
-            font-size: 2.5rem;
+
+        .filter-label {
             font-weight: 600;
-            color: var(--ksc-primary);
-            margin-bottom: 0.5rem;
+            color: var(--ksc-secondary);
         }
-        .stat-change {
-            font-size: 0.8125rem;
+
+        .filter-group {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .filter-btn {
+            padding: 0.6rem 1.25rem;
+            border: 2px solid var(--ksc-accent);
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .filter-btn.active {
+            background: var(--ksc-primary);
+            color: white;
+            border-color: var(--ksc-primary);
+        }
+
+        /* SECTION HEADERS */
+        .section-header {
             display: flex;
             align-items: center;
-            gap: 0.25rem;
+            gap: 1rem;
+            margin: 2rem 0 1rem 0;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid var(--ksc-primary);
         }
-        .stat-change.positive { color: #16a34a; }
-        .stat-change.negative { color: #dc2626; }
-        .chart-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-        .chart-card {
-            background: white;
+
+        .section-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--ksc-primary);
+            color: white;
             border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        }
-        .chart-title {
-            font-size: 1.125rem;
-            font-weight: 600;
-            margin-bottom: 1.5rem;
-            color: var(--ksc-primary);
-        }
-        .chart-placeholder {
-            height: 300px;
-            background: var(--ksc-light);
-            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: var(--ksc-secondary);
-            font-size: 0.875rem;
+            font-size: 1.5rem;
         }
-        .kpi-grid {
+
+        .section-title h2 { font-size: 1.4rem; }
+        .section-title p { font-size: 0.85rem; color: var(--ksc-secondary); margin-top: 0.2rem; }
+
+        /* INDICATOR GRID */
+        .indicator-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .indicator-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .indicator-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--ksc-primary);
+        }
+
+        .indicator-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .indicator-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--ksc-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .traffic-light {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .traffic-light.green { background: var(--green); }
+        .traffic-light.amber { background: var(--amber); }
+        .traffic-light.red { background: var(--red); }
+
+        .indicator-value {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--ksc-primary);
+            line-height: 1;
+            margin-bottom: 0.5rem;
+        }
+
+        .indicator-subtitle {
+            font-size: 0.8rem;
+            color: var(--ksc-secondary);
+        }
+
+        /* RATE CARDS */
+        .rate-card {
+            background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+            border: 2px solid var(--ksc-accent);
+        }
+
+        .rate-card .indicator-value {
+            font-size: 2.5rem;
+        }
+
+        .rate-breakdown {
+            display: flex;
+            gap: 1rem;
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid var(--ksc-accent);
+            font-size: 0.8rem;
+        }
+
+        .rate-breakdown div {
+            flex: 1;
+        }
+
+        .rate-breakdown strong {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--ksc-secondary);
+            margin-bottom: 0.2rem;
+        }
+
+        /* CHARTS */
+        .chart-container {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            margin-bottom: 2rem;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--ksc-accent);
+        }
+
+        .chart-header h3 { font-size: 1.2rem; }
+
+        /* BAR CHART */
+        .bar-chart {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .bar-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .bar-label {
+            width: 140px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--ksc-secondary);
+        }
+
+        .bar-track {
+            flex: 1;
+            height: 32px;
+            background: var(--ksc-light);
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--ksc-primary), var(--ksc-secondary));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 0.75rem;
+            color: white;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: width 0.5s ease;
+        }
+
+        /* ACTION STATUS */
+        .action-status-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 1rem;
         }
-        .kpi-item {
+
+        .action-status-card {
             background: white;
             border-radius: 8px;
             padding: 1.25rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            text-align: center;
+            border: 2px solid var(--ksc-accent);
         }
-        .kpi-label {
-            font-size: 0.8125rem;
-            color: var(--ksc-secondary);
+
+        .action-status-card.overdue {
+            background: #fee2e2;
+            border-color: #dc2626;
+        }
+
+        .action-count {
+            font-size: 2rem;
+            font-weight: 700;
             margin-bottom: 0.5rem;
         }
-        .kpi-value {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: var(--ksc-primary);
-        }
-        .progress-bar {
-            width: 100%;
-            height: 8px;
-            background: var(--ksc-light);
-            border-radius: 4px;
-            margin-top: 0.75rem;
-            overflow: hidden;
-        }
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--ksc-primary), var(--ksc-secondary));
-            border-radius: 4px;
-            transition: width 0.3s ease;
-        }
-        .table-card {
-            background: white;
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-            margin-bottom: 2rem;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.875rem;
-        }
-        thead {
-            background: var(--ksc-light);
-        }
-        th {
-            padding: 0.875rem 1rem;
-            text-align: left;
-            font-weight: 600;
-            color: var(--ksc-primary);
-        }
-        td {
-            padding: 0.875rem 1rem;
-            border-bottom: 1px solid #e7e5e4;
-        }
-        tbody tr:hover {
-            background: var(--ksc-light);
-        }
-        .badge {
-            display: inline-block;
-            padding: 0.25rem 0.75rem;
-            border-radius: 12px;
-            font-size: 0.75rem;
+
+        .action-count.overdue { color: #dc2626; }
+        .action-count.open { color: #f59e0b; }
+        .action-count.closed { color: #059669; }
+
+        .action-label {
+            font-size: 0.85rem;
             font-weight: 600;
             text-transform: uppercase;
+            color: var(--ksc-secondary);
         }
-        .badge-high { background: #fee2e2; color: #991b1b; }
-        .badge-medium { background: #fef3c7; color: #92400e; }
-        .badge-low { background: #d1fae5; color: #065f46; }
-        .loading {
-            position: fixed;
-            top: 0;
-            left: 0;
+
+        /* SENTIMENT */
+        .sentiment-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+
+        .sentiment-card {
+            padding: 1.25rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .sentiment-card.positive { background: #d1fae5; border: 2px solid #059669; }
+        .sentiment-card.neutral { background: #e0e7ff; border: 2px solid #4f46e5; }
+        .sentiment-card.negative { background: #fee2e2; border: 2px solid #dc2626; }
+
+        .sentiment-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+        .sentiment-count { font-size: 1.8rem; font-weight: 700; margin-bottom: 0.3rem; }
+        .sentiment-label { font-size: 0.85rem; font-weight: 600; }
+
+        /* MANAGER CONTROLS */
+        .manager-controls {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            margin-bottom: 2rem;
+            border-left: 4px solid #3b82f6;
+        }
+
+        .manager-controls h3 {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            color: #1e40af;
+        }
+
+        .control-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .control-item label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .control-item input {
             width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.3);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
+            padding: 0.75rem;
+            border: 2px solid var(--ksc-accent);
+            border-radius: 8px;
+            font-size: 1rem;
         }
-        .loading.active { display: flex; }
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid var(--ksc-primary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
+
+        .btn-update {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 0.875rem 2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 1rem;
         }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+
+        .btn-update:hover {
+            background: #2563eb;
+        }
+
+        @media (max-width: 768px) {
+            .indicator-grid { grid-template-columns: 1fr; }
+            .sentiment-grid { grid-template-columns: 1fr; }
+            .action-status-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
-    <div class="loading" id="loading">
-        <div class="spinner"></div>
+    <!-- LOGIN -->
+    <div id="login-screen" class="login-container">
+        <div class="login-box">
+            <h1>Executive Dashboard</h1>
+            <p id="client-login-name" style="color: #6d5742; margin-bottom: 1rem;">Loading...</p>
+            
+            <div class="password-hint">
+                <strong>DEFAULT PASSWORD:</strong>
+                <code style="background: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 1.1rem;">safety123</code>
+            </div>
+            
+            <form id="login-form" onsubmit="login(event)">
+                <input type="password" class="form-input" id="password-input" placeholder="Enter password" required>
+                <button type="submit" class="btn-login">Login</button>
+            </form>
+        </div>
     </div>
 
-    <header class="header">
-        <div class="header-top">
-            <div class="logo-section">
-                <div class="logo-circle">KSC</div>
-                <div>
+    <!-- DASHBOARD -->
+    <div id="dashboard" class="dashboard">
+        <header class="dashboard-header">
+            <div class="header-top">
+                <div class="header-title">
                     <h1>Executive Dashboard</h1>
-                    <p class="subtitle">Real-time WHS Performance Metrics</p>
+                    <p id="client-dashboard-name">Loading...</p>
+                </div>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+        </header>
+
+        <main class="dashboard-content">
+            
+            <!-- FILTER BAR -->
+            <div class="filter-bar">
+                <span class="filter-label">Period:</span>
+                <div class="filter-group">
+                    <button class="filter-btn" onclick="setFilter('month')">This Month</button>
+                    <button class="filter-btn" onclick="setFilter('quarter')">This Quarter</button>
+                    <button class="filter-btn active" onclick="setFilter('ytd-cal')">YTD (Calendar)</button>
+                    <button class="filter-btn" onclick="setFilter('ytd-fin')">YTD (Financial)</button>
                 </div>
             </div>
-            <button class="btn btn-light" onclick="refreshData()">↻ Refresh</button>
-        </div>
-        <div class="filters">
-            <select class="filter-select" id="client-filter" onchange="applyFilters()">
-                <option value="">All Clients</option>
-            </select>
-            <select class="filter-select" id="period-filter" onchange="applyFilters()">
-                <option value="30">Last 30 Days</option>
-                <option value="90">Last 90 Days</option>
-                <option value="365">This Year</option>
-                <option value="all">All Time</option>
-            </select>
-        </div>
-    </header>
 
-    <!-- KPI STATS -->
-    <div class="stats-grid" id="kpi-stats">
-        <div class="stat-card">
-            <div class="stat-label">Total Incidents (YTD)</div>
-            <div class="stat-value" id="total-incidents">-</div>
-            <div class="stat-change" id="incidents-change">Loading...</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-label">Lost Time Injury Rate</div>
-            <div class="stat-value" id="ltir">-</div>
-            <div class="stat-change" id="ltir-change">Loading...</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-label">Open Hazards</div>
-            <div class="stat-value" id="open-hazards">-</div>
-            <div class="stat-change" id="hazards-change">Loading...</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-label">Site Inspections (30d)</div>
-            <div class="stat-value" id="inspections-count">-</div>
-            <div class="stat-change positive">↑ On target</div>
-        </div>
-    </div>
+            <!-- MANAGER CONTROLS -->
+            <div class="manager-controls">
+                <h3>📊 Manager Controls - Update Hours & Classifications</h3>
+                <div class="control-grid">
+                    <div class="control-item">
+                        <label>Hours This Month</label>
+                        <input type="number" id="hours-month" value="45000" min="0" step="100">
+                    </div>
+                    <div class="control-item">
+                        <label>Hours YTD (Calendar)</label>
+                        <input type="number" id="hours-ytd-cal" value="500000" min="0" step="1000">
+                    </div>
+                    <div class="control-item">
+                        <label>Hours YTD (Financial)</label>
+                        <input type="number" id="hours-ytd-fin" value="520000" min="0" step="1000">
+                    </div>
+                    <div class="control-item">
+                        <label>LTI Count</label>
+                        <input type="number" id="lti-count" value="2" min="0">
+                    </div>
+                    <div class="control-item">
+                        <label>MTI Count</label>
+                        <input type="number" id="mti-count" value="3" min="0">
+                    </div>
+                    <div class="control-item">
+                        <label>Total Days Lost (LTI)</label>
+                        <input type="number" id="days-lost" value="48" min="0">
+                    </div>
+                </div>
+                <button class="btn-update" onclick="updateMetrics()">Update & Recalculate</button>
+            </div>
 
-    <!-- CHARTS -->
-    <div class="chart-grid">
-        <div class="chart-card">
-            <h3 class="chart-title">Incidents Trend (Monthly)</h3>
-            <div class="chart-placeholder" id="incidents-chart">
-                Chart will render here with real data
-            </div>
-        </div>
-        <div class="chart-card">
-            <h3 class="chart-title">Hazards by Risk Level</h3>
-            <div class="chart-placeholder" id="hazards-chart">
-                Chart will render here with real data
-            </div>
-        </div>
-        <div class="chart-card">
-            <h3 class="chart-title">Workers Comp Status</h3>
-            <div class="chart-placeholder" id="workerscomp-chart">
-                Chart will render here with real data
-            </div>
-        </div>
-        <div class="chart-card">
-            <h3 class="chart-title">Inspection Pass Rates</h3>
-            <div class="chart-placeholder" id="inspection-chart">
-                Chart will render here with real data
-            </div>
-        </div>
-    </div>
-
-    <!-- PERFORMANCE METRICS -->
-    <div class="table-card">
-        <h3 class="chart-title">Performance KPIs</h3>
-        <div class="kpi-grid">
-            <div class="kpi-item">
-                <div class="kpi-label">SWMS Compliance</div>
-                <div class="kpi-value" id="swms-compliance">-</div>
-                <div class="progress-bar">
-                    <div class="progress-fill" id="swms-progress" style="width: 0%"></div>
+            <!-- LAG INDICATORS -->
+            <div class="section-header">
+                <div class="section-icon">📉</div>
+                <div class="section-title">
+                    <h2>Lag Indicators</h2>
+                    <p>What has already happened - reactive metrics</p>
                 </div>
             </div>
-            <div class="kpi-item">
-                <div class="kpi-label">Actions Closed On Time</div>
-                <div class="kpi-value" id="actions-ontime">-</div>
-                <div class="progress-bar">
-                    <div class="progress-fill" id="actions-progress" style="width: 0%"></div>
-                </div>
-            </div>
-            <div class="kpi-item">
-                <div class="kpi-label">Average Inspection Score</div>
-                <div class="kpi-value" id="avg-inspection">-</div>
-                <div class="progress-bar">
-                    <div class="progress-fill" id="inspection-progress" style="width: 0%"></div>
-                </div>
-            </div>
-            <div class="kpi-item">
-                <div class="kpi-label">Training Completion</div>
-                <div class="kpi-value" id="training-rate">-</div>
-                <div class="progress-bar">
-                    <div class="progress-fill" id="training-progress" style="width: 0%"></div>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <!-- TOP HAZARDS -->
-    <div class="table-card">
-        <h3 class="chart-title">Top Open Hazards</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Hazard ID</th>
-                    <th>Location</th>
-                    <th>Type</th>
-                    <th>Risk Level</th>
-                    <th>Client</th>
-                    <th>Days Open</th>
-                </tr>
-            </thead>
-            <tbody id="top-hazards-table">
-                <tr><td colspan="6">Loading...</td></tr>
-            </tbody>
-        </table>
-    </div>
+            <div class="indicator-grid">
+                <div class="indicator-card">
+                    <div class="indicator-header">
+                        <div class="indicator-label">Notifiable Incidents</div>
+                        <div class="traffic-light red" id="light-notifiable"></div>
+                    </div>
+                    <div class="indicator-value" id="notifiable-count">0</div>
+                    <div class="indicator-subtitle">WorkSafe notifiable events</div>
+                </div>
 
-    <!-- RECENT INCIDENTS -->
-    <div class="table-card">
-        <h3 class="chart-title">Recent Incidents</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>Type</th>
-                    <th>Description</th>
-                    <th>Worker</th>
-                    <th>Client</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody id="recent-incidents-table">
-                <tr><td colspan="6">Loading...</td></tr>
-            </tbody>
-        </table>
+                <div class="indicator-card">
+                    <div class="indicator-header">
+                        <div class="indicator-label">Total Injuries</div>
+                        <div class="traffic-light amber" id="light-injuries"></div>
+                    </div>
+                    <div class="indicator-value" id="total-injuries">5</div>
+                    <div class="indicator-subtitle">LTI + MTI (excl. First Aid)</div>
+                </div>
+
+                <div class="indicator-card">
+                    <div class="indicator-header">
+                        <div class="indicator-label">Lost Time Injuries</div>
+                        <div class="traffic-light green" id="light-lti"></div>
+                    </div>
+                    <div class="indicator-value" id="lti-value">2</div>
+                    <div class="indicator-subtitle">Time away from work</div>
+                </div>
+
+                <div class="indicator-card">
+                    <div class="indicator-header">
+                        <div class="indicator-label">Medical Treatment</div>
+                        <div class="traffic-light amber" id="light-mti"></div>
+                    </div>
+                    <div class="indicator-value" id="mti-value">3</div>
+                    <div class="indicator-subtitle">Required medical attention</div>
+                </div>
+
+                <div class="indicator-card">
+                    <div class="indicator-header">
+                        <div class="indicator-label">First Aid Cases</div>
+                        <div class="traffic-light green" id="light-firstaid"></div>
+                    </div>
+                    <div class="indicator-value" id="firstaid-value">8</div>
+                    <div class="indicator-subtitle">Minor injuries (not in TRIFR)</div>
+                </div>
+
+                <div class="indicator-card">
+                    <div class="indicator-header">
+                        <div class="indicator-label">Average Days Lost</div>
+                        <div class="traffic-light amber" id="light-dayslost"></div>
+                    </div>
+                    <div class="indicator-value" id="avgdays-value">24</div>
+                    <div class="indicator-subtitle">Per LTI injury</div>
+                </div>
+
+                <div class="indicator-card">
+                    <div class="indicator-header">
+                        <div class="indicator-label">Near Misses</div>
+                        <div class="traffic-light green" id="light-nearmiss"></div>
+                    </div>
+                    <div class="indicator-value" id="nearmiss-value">24</div>
+                    <div class="indicator-subtitle">Potential incidents reported</div>
+                </div>
+
+                <div class="indicator-card rate-card">
+                    <div class="indicator-header">
+                        <div class="indicator-label">TRIFR (Australian)</div>
+                        <div class="traffic-light green" id="light-trifr"></div>
+                    </div>
+                    <div class="indicator-value" id="trifr-value">10.0</div>
+                    <div class="indicator-subtitle">Total Recordable Injury Frequency Rate</div>
+                    <div class="rate-breakdown">
+                        <div>
+                            <strong>Formula</strong>
+                            (LTI + MTI) / Hours × 1M
+                        </div>
+                        <div>
+                            <strong>Hours</strong>
+                            <span id="hours-display">500,000</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="indicator-card rate-card">
+                    <div class="indicator-header">
+                        <div class="indicator-label">LTIFR</div>
+                        <div class="traffic-light green" id="light-ltifr"></div>
+                    </div>
+                    <div class="indicator-value" id="ltifr-value">4.0</div>
+                    <div class="indicator-subtitle">Lost Time Injury Frequency Rate</div>
+                    <div class="rate-breakdown">
+                        <div>
+                            <strong>Formula</strong>
+                            LTI / Hours × 1M
+                        </div>
+                        <div>
+                            <strong>Benchmark</strong>
+                            <5 (Construction)
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- INJURY LOCATIONS -->
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h3>Injury Locations</h3>
+                </div>
+                <div class="bar-chart">
+                    <div class="bar-item">
+                        <div class="bar-label">Building Site A</div>
+                        <div class="bar-track">
+                            <div class="bar-fill" style="width: 45%;">5</div>
+                        </div>
+                    </div>
+                    <div class="bar-item">
+                        <div class="bar-label">Warehouse</div>
+                        <div class="bar-track">
+                            <div class="bar-fill" style="width: 36%;">4</div>
+                        </div>
+                    </div>
+                    <div class="bar-item">
+                        <div class="bar-label">Site Office</div>
+                        <div class="bar-track">
+                            <div class="bar-fill" style="width: 18%;">2</div>
+                        </div>
+                    </div>
+                    <div class="bar-item">
+                        <div class="bar-label">Loading Bay</div>
+                        <div class="bar-track">
+                            <div class="bar-fill" style="width: 27%;">3</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- INJURY BODY PART/AREA -->
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h3>Injury Area/Body Part</h3>
+                </div>
+                <div class="bar-chart">
+                    <div class="bar-item">
+                        <div class="bar-label">Hand/Fingers</div>
+                        <div class="bar-track">
+                            <div class="bar-fill" style="width: 50%;">6</div>
+                        </div>
+                    </div>
+                    <div class="bar-item">
+                        <div class="bar-label">Back/Spine</div>
+                        <div class="bar-track">
+                            <div class="bar-fill" style="width: 33%;">4</div>
+                        </div>
+                    </div>
+                    <div class="bar-item">
+                        <div class="bar-label">Lower Limbs</div>
+                        <div class="bar-track">
+                            <div class="bar-fill" style="width: 25%;">3</div>
+                        </div>
+                    </div>
+                    <div class="bar-item">
+                        <div class="bar-label">Head/Face</div>
+                        <div class="bar-track">
+                            <div class="bar-fill" style="width: 17%;">2</div>
+                        </div>
+                    </div>
+                    <div class="bar-item">
+                        <div class="bar-label">Shoulder/Arm</div>
+                        <div class="bar-track">
+                            <div class="bar-fill" style="width: 8%;">1</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LEAD INDICATORS -->
+            <div class="section-header">
+                <div class="section-icon">📈</div>
+                <div class="section-title">
+                    <h2>Lead Indicators</h2>
+                    <p>Proactive measures - preventing future incidents</p>
+                </div>
+            </div>
+
+            <div class="indicator-grid">
+                <div class="indicator-card">
+                    <div class="indicator-header">
+                        <div class="indicator-label">Hazards Reported</div>
+                        <div class="traffic-light green" id="light-hazards"></div>
+                    </div>
+                    <div class="indicator-value" id="hazards-value">47</div>
+                    <div class="indicator-subtitle">Active hazard reporting</div>
+                </div>
+
+                <div class="indicator-card">
+                    <div class="indicator-header">
+                        <div class="indicator-label">Quality NCRs</div>
+                        <div class="traffic-light amber" id="light-ncr"></div>
+                    </div>
+                    <div class="indicator-value" id="ncr-value">12</div>
+                    <div class="indicator-subtitle">Non-conformance reports</div>
+                </div>
+
+                <div class="indicator-card">
+                    <div class="indicator-header">
+                        <div class="indicator-label">Inspections</div>
+                        <div class="traffic-light green" id="light-inspections"></div>
+                    </div>
+                    <div class="indicator-value" id="inspections-value">38</div>
+                    <div class="indicator-subtitle">Completed this period</div>
+                </div>
+
+                <div class="indicator-card">
+                    <div class="indicator-header">
+                        <div class="indicator-label">Safety Observations</div>
+                        <div class="traffic-light green" id="light-observations"></div>
+                    </div>
+                    <div class="indicator-value" id="observations-value">156</div>
+                    <div class="indicator-subtitle">Take 5s & observations</div>
+                </div>
+            </div>
+
+            <!-- CORRECTIVE ACTIONS -->
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h3>Corrective Actions Status</h3>
+                </div>
+                <div class="action-status-grid">
+                    <div class="action-status-card">
+                        <div class="action-count open">23</div>
+                        <div class="action-label">Open</div>
+                    </div>
+                    <div class="action-status-card">
+                        <div class="action-count closed">67</div>
+                        <div class="action-label">Closed</div>
+                    </div>
+                    <div class="action-status-card overdue">
+                        <div class="action-count overdue">5</div>
+                        <div class="action-label">⚠️ Overdue</div>
+                    </div>
+                    <div class="action-status-card">
+                        <div class="action-count" style="color: #dc2626;">2</div>
+                        <div class="action-label">Critical</div>
+                    </div>
+                    <div class="action-status-card">
+                        <div class="action-count" style="color: #f59e0b;">8</div>
+                        <div class="action-label">High</div>
+                    </div>
+                    <div class="action-status-card">
+                        <div class="action-count" style="color: #3b82f6;">13</div>
+                        <div class="action-label">Medium</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FEEDBACK SENTIMENT -->
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h3>Safety Culture Feedback</h3>
+                </div>
+                <div class="sentiment-grid">
+                    <div class="sentiment-card positive">
+                        <div class="sentiment-icon">😊</div>
+                        <div class="sentiment-count">42</div>
+                        <div class="sentiment-label">Positive</div>
+                    </div>
+                    <div class="sentiment-card neutral">
+                        <div class="sentiment-icon">😐</div>
+                        <div class="sentiment-count">8</div>
+                        <div class="sentiment-label">Neutral</div>
+                    </div>
+                    <div class="sentiment-card negative">
+                        <div class="sentiment-icon">😟</div>
+                        <div class="sentiment-count">3</div>
+                        <div class="sentiment-label">Negative</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FEEDBACK CATEGORIES -->
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h3>Feedback by Category</h3>
+                </div>
+                <div class="bar-chart">
+                    <div class="bar-item">
+                        <div class="bar-label">Communication</div>
+                        <div class="bar-track">
+                            <div class="bar-fill" style="width: 60%;">18</div>
+                        </div>
+                    </div>
+                    <div class="bar-item">
+                        <div class="bar-label">PPE & Equipment</div>
+                        <div class="bar-track">
+                            <div class="bar-fill" style="width: 40%;">12</div>
+                        </div>
+                    </div>
+                    <div class="bar-item">
+                        <div class="bar-label">Training</div>
+                        <div class="bar-track">
+                            <div class="bar-fill" style="width: 33%;">10</div>
+                        </div>
+                    </div>
+                    <div class="bar-item">
+                        <div class="bar-label">Leadership</div>
+                        <div class="bar-track">
+                            <div class="bar-fill" style="width: 27%;">8</div>
+                        </div>
+                    </div>
+                    <div class="bar-item">
+                        <div class="bar-label">Procedures</div>
+                        <div class="bar-track">
+                            <div class="bar-fill" style="width: 17%;">5</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- WORKERS COMPENSATION BREAKDOWN -->
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h3>Workers Compensation Claims</h3>
+                </div>
+                
+                <div class="indicator-grid" style="margin-bottom: 2rem;">
+                    <div class="indicator-card">
+                        <div class="indicator-header">
+                            <div class="indicator-label">Total Claims</div>
+                            <div class="traffic-light amber" id="light-wc-total"></div>
+                        </div>
+                        <div class="indicator-value" id="wc-total">8</div>
+                        <div class="indicator-subtitle">YTD workers comp claims</div>
+                    </div>
+
+                    <div class="indicator-card">
+                        <div class="indicator-header">
+                            <div class="indicator-label">Open Claims</div>
+                            <div class="traffic-light red" id="light-wc-open"></div>
+                        </div>
+                        <div class="indicator-value" id="wc-open">3</div>
+                        <div class="indicator-subtitle">Currently active</div>
+                    </div>
+
+                    <div class="indicator-card">
+                        <div class="indicator-header">
+                            <div class="indicator-label">Avg Days to RTW</div>
+                            <div class="traffic-light amber" id="light-wc-rtw"></div>
+                        </div>
+                        <div class="indicator-value" id="wc-rtw-days">18</div>
+                        <div class="indicator-subtitle">Return to work time</div>
+                    </div>
+
+                    <div class="indicator-card rate-card">
+                        <div class="indicator-header">
+                            <div class="indicator-label">Total Claim Cost</div>
+                            <div class="traffic-light red" id="light-wc-cost"></div>
+                        </div>
+                        <div class="indicator-value" style="font-size: 2rem;" id="wc-cost">$127K</div>
+                        <div class="indicator-subtitle">YTD total estimated costs</div>
+                    </div>
+                </div>
+
+                <h4 style="font-size: 1rem; font-weight: 600; margin-bottom: 1rem; color: var(--ksc-primary);">Claims by Body Part</h4>
+                <div class="bar-chart">
+                    <div class="bar-item">
+                        <div class="bar-label">Back/Spine</div>
+                        <div class="bar-track">
+                            <div class="bar-fill" style="width: 50%;">4</div>
+                        </div>
+                    </div>
+                    <div class="bar-item">
+                        <div class="bar-label">Hand/Finger</div>
+                        <div class="bar-track">
+                            <div class="bar-fill" style="width: 25%;">2</div>
+                        </div>
+                    </div>
+                    <div class="bar-item">
+                        <div class="bar-label">Knee/Leg</div>
+                        <div class="bar-track">
+                            <div class="bar-fill" style="width: 12.5%;">1</div>
+                        </div>
+                    </div>
+                    <div class="bar-item">
+                        <div class="bar-label">Shoulder/Arm</div>
+                        <div class="bar-track">
+                            <div class="bar-fill" style="width: 12.5%;">1</div>
+                        </div>
+                    </div>
+                </div>
+
+                <h4 style="font-size: 1rem; font-weight: 600; margin: 1.5rem 0 1rem; color: var(--ksc-primary);">Claim Status Breakdown</h4>
+                <div class="action-status-grid">
+                    <div class="action-status-card">
+                        <div class="action-count" style="color: #f59e0b;">2</div>
+                        <div class="action-label">Lodged</div>
+                    </div>
+                    <div class="action-status-card">
+                        <div class="action-count" style="color: #3b82f6;">1</div>
+                        <div class="action-label">Accepted</div>
+                    </div>
+                    <div class="action-status-card">
+                        <div class="action-count" style="color: #8b5cf6;">2</div>
+                        <div class="action-label">RTW Planning</div>
+                    </div>
+                    <div class="action-status-card">
+                        <div class="action-count" style="color: #10b981;">1</div>
+                        <div class="action-label">On Light Duties</div>
+                    </div>
+                    <div class="action-status-card">
+                        <div class="action-count closed">2</div>
+                        <div class="action-label">Closed</div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
     </div>
 
     <script>
-        // ===== CONFIGURATION =====
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw5p7dj6AL94zmurfdUFxLth2hd_zJ28zfbTyK17cwgnUDTNO87NSyZ76CxZHA4Zu_DUQ/exec';
-
-        // ===== STATE =====
-        let allData = {
-            incidents: [],
-            hazards: [],
-            actions: [],
-            swms: [],
-            inspections: [],
-            workerscomp: []
+        // CONFIGURATION
+        const CONFIG = {
+            CLIENT_NAME: 'ABC Construction Pty Ltd',
+            PASSWORD: 'safety123',
+            
+            // THRESHOLDS
+            TRIFR_GREEN: 5,
+            TRIFR_AMBER: 10,
+            LTIFR_GREEN: 3,
+            LTIFR_AMBER: 6,
+            AVG_DAYS_LOST_GREEN: 10,
+            AVG_DAYS_LOST_AMBER: 20,
+            
+            // Financial year starts
+            FINANCIAL_YEAR_START_MONTH: 7 // July = 7
         };
-
-        // ===== INIT =====
-        window.onload = function() {
-            loadAllData();
-        };
-
-        // ===== LOADING =====
-        function showLoading() {
-            document.getElementById('loading').classList.add('active');
-        }
-
-        function hideLoading() {
-            document.getElementById('loading').classList.remove('active');
-        }
-
-        // ===== DATA LOADING =====
-        async function loadAllData() {
-            showLoading();
-            try {
-                const response = await fetch(GOOGLE_SCRIPT_URL + '?action=getAllData');
-                const data = await response.json();
-                allData = data;
-                populateFilters();
-                renderDashboard();
-            } catch(error) {
-                console.error('Error loading data:', error);
-                alert('Error connecting to Google Sheets. Using demo data.');
-                loadDemoData();
-            }
-            hideLoading();
-        }
-
-        function loadDemoData() {
-            // Demo data for testing
-            allData = {
-                incidents: [
-                    {IncidentID: 'INC-001', DateIncident: '2026-05-01', Type: 'Injury', Description: 'Hand cut', Worker: 'John', Client: 'ABC Construction', Status: 'Open'},
-                    {IncidentID: 'INC-002', DateIncident: '2026-05-03', Type: 'Near Miss', Description: 'Slip on floor', Worker: 'Sarah', Client: 'XYZ Electrical', Status: 'Closed'},
-                ],
-                hazards: [
-                    {HazardID: 'HAZ-001', Date: '2026-05-05', Location: 'Site A', Type: 'Electrical', RiskLevel: 'High', Client: 'ABC Construction', Status: 'Open'},
-                    {HazardID: 'HAZ-002', Date: '2026-05-06', Location: 'Workshop', Type: 'Housekeeping', RiskLevel: 'Medium', Client: 'XYZ Electrical', Status: 'Open'},
-                ],
-                actions: [
-                    {ActionID: 'CA-001', DateRaised: '2026-05-01', DueDate: '2026-05-15', Status: 'Open'},
-                    {ActionID: 'CA-002', DateRaised: '2026-04-25', DueDate: '2026-05-10', Status: 'Completed'},
-                ],
-                swms: [],
-                inspections: [
-                    {InspectionID: 'INS-001', Date: '2026-05-01', PassRate: '95%', Type: 'General', Client: 'ABC Construction'},
-                    {InspectionID: 'INS-002', Date: '2026-05-05', PassRate: '88%', Type: 'Electrical', Client: 'XYZ Electrical'},
-                ],
-                workerscomp: [
-                    {ClaimNumber: 'WC-001', Status: 'Open', DaysOffWork: 5, Client: 'ABC Construction'},
-                ]
-            };
-            renderDashboard();
-        }
-
-        function refreshData() {
-            loadAllData();
-        }
-
-        // ===== FILTERS =====
-        function populateFilters() {
-            const clients = [...new Set(allData.incidents.map(i => i.Client))];
-            const clientFilter = document.getElementById('client-filter');
-            clients.forEach(c => {
-                const opt = document.createElement('option');
-                opt.value = c;
-                opt.textContent = c;
-                clientFilter.appendChild(opt);
-            });
-        }
-
-        function applyFilters() {
-            renderDashboard();
-        }
-
-        function getFilteredData() {
-            const clientFilter = document.getElementById('client-filter').value;
-            const periodFilter = parseInt(document.getElementById('period-filter').value);
+        
+        let currentFilter = 'ytd-cal';
+        
+        document.getElementById('client-login-name').textContent = CONFIG.CLIENT_NAME;
+        document.getElementById('client-dashboard-name').textContent = CONFIG.CLIENT_NAME;
+        
+        // LOGIN
+        function login(event) {
+            event.preventDefault();
+            const password = document.getElementById('password-input').value;
             
-            let filtered = {...allData};
-            
-            if(clientFilter) {
-                filtered.incidents = filtered.incidents.filter(i => i.Client === clientFilter);
-                filtered.hazards = filtered.hazards.filter(h => h.Client === clientFilter);
-                filtered.inspections = filtered.inspections.filter(i => i.Client === clientFilter);
-            }
-            
-            if(periodFilter !== 'all') {
-                const cutoffDate = new Date();
-                cutoffDate.setDate(cutoffDate.getDate() - periodFilter);
-                
-                filtered.incidents = filtered.incidents.filter(i => new Date(i.DateIncident) >= cutoffDate);
-                filtered.hazards = filtered.hazards.filter(h => new Date(h.Date) >= cutoffDate);
-                filtered.inspections = filtered.inspections.filter(i => new Date(i.Date) >= cutoffDate);
-            }
-            
-            return filtered;
-        }
-
-        // ===== RENDER DASHBOARD =====
-        function renderDashboard() {
-            const data = getFilteredData();
-            
-            // KPI Stats
-            document.getElementById('total-incidents').textContent = data.incidents.length;
-            document.getElementById('incidents-change').innerHTML = '↑ +2 from last month';
-            document.getElementById('incidents-change').className = 'stat-change negative';
-            
-            const ltiCount = data.incidents.filter(i => i.Injury === 'Yes').length;
-            const ltir = data.incidents.length > 0 ? (ltiCount / data.incidents.length * 100).toFixed(1) : 0;
-            document.getElementById('ltir').textContent = ltir + '%';
-            document.getElementById('ltir-change').innerHTML = '↓ 1.2% from target';
-            document.getElementById('ltir-change').className = 'stat-change positive';
-            
-            const openHazards = data.hazards.filter(h => h.Status === 'Open').length;
-            document.getElementById('open-hazards').textContent = openHazards;
-            document.getElementById('hazards-change').innerHTML = openHazards > 5 ? '↑ Action required' : '↓ Under control';
-            document.getElementById('hazards-change').className = openHazards > 5 ? 'stat-change negative' : 'stat-change positive';
-            
-            document.getElementById('inspections-count').textContent = data.inspections.length;
-            
-            // Performance KPIs
-            document.getElementById('swms-compliance').textContent = '94%';
-            document.getElementById('swms-progress').style.width = '94%';
-            
-            document.getElementById('actions-ontime').textContent = '87%';
-            document.getElementById('actions-progress').style.width = '87%';
-            
-            const avgScore = data.inspections.length > 0 ? 
-                (data.inspections.reduce((sum, i) => sum + parseInt(i.PassRate), 0) / data.inspections.length).toFixed(0) : 0;
-            document.getElementById('avg-inspection').textContent = avgScore + '%';
-            document.getElementById('inspection-progress').style.width = avgScore + '%';
-            
-            document.getElementById('training-rate').textContent = '92%';
-            document.getElementById('training-progress').style.width = '92%';
-            
-            // Top Hazards Table
-            const topHazards = data.hazards.filter(h => h.Status === 'Open').slice(0, 5);
-            let hazardsHTML = '';
-            if(topHazards.length === 0) {
-                hazardsHTML = '<tr><td colspan="6" style="text-align:center;">No open hazards</td></tr>';
+            if (password === CONFIG.PASSWORD) {
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('dashboard').classList.add('active');
+                updateMetrics();
             } else {
-                topHazards.forEach(h => {
-                    const daysOpen = Math.floor((new Date() - new Date(h.Date)) / (1000 * 60 * 60 * 24));
-                    hazardsHTML += `
-                        <tr>
-                            <td>${h.HazardID}</td>
-                            <td>${h.Location}</td>
-                            <td>${h.Type}</td>
-                            <td><span class="badge badge-${h.RiskLevel.toLowerCase()}">${h.RiskLevel}</span></td>
-                            <td>${h.Client}</td>
-                            <td>${daysOpen}</td>
-                        </tr>
-                    `;
-                });
+                alert('Incorrect password');
             }
-            document.getElementById('top-hazards-table').innerHTML = hazardsHTML;
+        }
+        
+        function logout() {
+            document.getElementById('login-screen').style.display = 'flex';
+            document.getElementById('dashboard').classList.remove('active');
+            document.getElementById('password-input').value = '';
+        }
+        
+        // FILTER
+        function setFilter(period) {
+            currentFilter = period;
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            updateMetrics();
+        }
+        
+        // CALCULATE METRICS
+        function updateMetrics() {
+            // Get input values
+            let hoursWorked;
+            const hoursMonth = parseInt(document.getElementById('hours-month').value);
+            const hoursYtdCal = parseInt(document.getElementById('hours-ytd-cal').value);
+            const hoursYtdFin = parseInt(document.getElementById('hours-ytd-fin').value);
             
-            // Recent Incidents Table
-            const recentIncidents = data.incidents.slice(0, 5);
-            let incidentsHTML = '';
-            if(recentIncidents.length === 0) {
-                incidentsHTML = '<tr><td colspan="6" style="text-align:center;">No incidents</td></tr>';
+            // Select hours based on filter
+            if (currentFilter === 'month') {
+                hoursWorked = hoursMonth;
+            } else if (currentFilter === 'ytd-fin') {
+                hoursWorked = hoursYtdFin;
             } else {
-                recentIncidents.forEach(i => {
-                    incidentsHTML += `
-                        <tr>
-                            <td>${i.DateIncident}</td>
-                            <td>${i.Type}</td>
-                            <td>${i.Description}</td>
-                            <td>${i.Worker}</td>
-                            <td>${i.Client}</td>
-                            <td><span class="badge badge-${i.Status.toLowerCase()}">${i.Status}</span></td>
-                        </tr>
-                    `;
-                });
+                hoursWorked = hoursYtdCal; // Default YTD calendar
             }
-            document.getElementById('recent-incidents-table').innerHTML = incidentsHTML;
+            
+            const lti = parseInt(document.getElementById('lti-count').value);
+            const mti = parseInt(document.getElementById('mti-count').value);
+            const daysLost = parseInt(document.getElementById('days-lost').value);
+            
+            // AUSTRALIAN TRIFR CALCULATION - NO FIRST AID
+            const totalInjuries = lti + mti;
+            const trifr = ((lti + mti) / hoursWorked * 1000000).toFixed(1);
+            const ltifr = (lti / hoursWorked * 1000000).toFixed(1);
+            const avgDaysLost = lti > 0 ? (daysLost / lti).toFixed(1) : 0;
+            
+            // Update displays
+            document.getElementById('total-injuries').textContent = totalInjuries;
+            document.getElementById('lti-value').textContent = lti;
+            document.getElementById('mti-value').textContent = mti;
+            document.getElementById('trifr-value').textContent = trifr;
+            document.getElementById('ltifr-value').textContent = ltifr;
+            document.getElementById('avgdays-value').textContent = avgDaysLost;
+            document.getElementById('hours-display').textContent = hoursWorked.toLocaleString();
+            
+            // Update traffic lights
+            updateTrafficLight('light-trifr', trifr, CONFIG.TRIFR_GREEN, CONFIG.TRIFR_AMBER);
+            updateTrafficLight('light-ltifr', ltifr, CONFIG.LTIFR_GREEN, CONFIG.LTIFR_AMBER);
+            updateTrafficLight('light-dayslost', avgDaysLost, CONFIG.AVG_DAYS_LOST_GREEN, CONFIG.AVG_DAYS_LOST_AMBER);
+            updateTrafficLight('light-injuries', totalInjuries, 5, 10);
+            updateTrafficLight('light-lti', lti, 2, 4);
+            updateTrafficLight('light-mti', mti, 3, 6);
+        }
+        
+        function updateTrafficLight(elementId, value, greenMax, amberMax) {
+            const light = document.getElementById(elementId);
+            light.className = 'traffic-light';
+            
+            if (value <= greenMax) {
+                light.classList.add('green');
+            } else if (value <= amberMax) {
+                light.classList.add('amber');
+            } else {
+                light.classList.add('red');
+            }
         }
     </script>
 </body>
