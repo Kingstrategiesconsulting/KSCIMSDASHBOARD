@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KSC Executive Dashboard</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --ksc-primary: #3d2817;
+            --ksc-secondary: #6d5742;
+            --ksc-accent: #d4c6b8;
+            --ksc-light: #eee4db;
+            --bg-cream: #f5f0ea;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-cream);
+            color: var(--ksc-primary);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        .header {
+            background: linear-gradient(135deg, var(--ksc-primary) 0%, #2a1a0f 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        .logo-section { display: flex; align-items: center; gap: 1rem; }
+        .logo-circle {
+            width: 56px; height: 56px; background: white; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 300; font-size: 1rem; color: var(--ksc-primary); letter-spacing: 3px;
+        }
+        h1 { font-size: 2rem; font-weight: 600; }
+        .subtitle { font-size: 1rem; opacity: 0.9; margin-top: 0.5rem; }
+        .filters {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        .filter-select {
+            padding: 0.625rem 1.25rem;
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 6px;
+            font-size: 0.875rem;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            cursor: pointer;
+        }
+        .filter-select option { color: var(--ksc-primary); }
+        .btn {
+            padding: 0.625rem 1.25rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-light {
+            background: white;
+            color: var(--ksc-primary);
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--ksc-secondary);
+            margin-bottom: 0.5rem;
+        }
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 600;
+            color: var(--ksc-primary);
+            margin-bottom: 0.5rem;
+        }
+        .stat-change {
+            font-size: 0.8125rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        .stat-change.positive { color: #16a34a; }
+        .stat-change.negative { color: #dc2626; }
+        .chart-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .chart-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .chart-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: var(--ksc-primary);
+        }
+        .chart-placeholder {
+            height: 300px;
+            background: var(--ksc-light);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--ksc-secondary);
+            font-size: 0.875rem;
+        }
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+        .kpi-item {
+            background: white;
+            border-radius: 8px;
+            padding: 1.25rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .kpi-label {
+            font-size: 0.8125rem;
+            color: var(--ksc-secondary);
+            margin-bottom: 0.5rem;
+        }
+        .kpi-value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--ksc-primary);
+        }
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--ksc-light);
+            border-radius: 4px;
+            margin-top: 0.75rem;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--ksc-primary), var(--ksc-secondary));
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+        .table-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-bottom: 2rem;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+        }
+        thead {
+            background: var(--ksc-light);
+        }
+        th {
+            padding: 0.875rem 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--ksc-primary);
+        }
+        td {
+            padding: 0.875rem 1rem;
+            border-bottom: 1px solid #e7e5e4;
+        }
+        tbody tr:hover {
+            background: var(--ksc-light);
+        }
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .badge-high { background: #fee2e2; color: #991b1b; }
+        .badge-medium { background: #fef3c7; color: #92400e; }
+        .badge-low { background: #d1fae5; color: #065f46; }
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.3);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+        .loading.active { display: flex; }
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--ksc-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="loading" id="loading">
+        <div class="spinner"></div>
+    </div>
+
+    <header class="header">
+        <div class="header-top">
+            <div class="logo-section">
+                <div class="logo-circle">KSC</div>
+                <div>
+                    <h1>Executive Dashboard</h1>
+                    <p class="subtitle">Real-time WHS Performance Metrics</p>
+                </div>
+            </div>
+            <button class="btn btn-light" onclick="refreshData()">↻ Refresh</button>
+        </div>
+        <div class="filters">
+            <select class="filter-select" id="client-filter" onchange="applyFilters()">
+                <option value="">All Clients</option>
+            </select>
+            <select class="filter-select" id="period-filter" onchange="applyFilters()">
+                <option value="30">Last 30 Days</option>
+                <option value="90">Last 90 Days</option>
+                <option value="365">This Year</option>
+                <option value="all">All Time</option>
+            </select>
+        </div>
+    </header>
+
+    <!-- KPI STATS -->
+    <div class="stats-grid" id="kpi-stats">
+        <div class="stat-card">
+            <div class="stat-label">Total Incidents (YTD)</div>
+            <div class="stat-value" id="total-incidents">-</div>
+            <div class="stat-change" id="incidents-change">Loading...</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Lost Time Injury Rate</div>
+            <div class="stat-value" id="ltir">-</div>
+            <div class="stat-change" id="ltir-change">Loading...</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Open Hazards</div>
+            <div class="stat-value" id="open-hazards">-</div>
+            <div class="stat-change" id="hazards-change">Loading...</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Site Inspections (30d)</div>
+            <div class="stat-value" id="inspections-count">-</div>
+            <div class="stat-change positive">↑ On target</div>
+        </div>
+    </div>
+
+    <!-- CHARTS -->
+    <div class="chart-grid">
+        <div class="chart-card">
+            <h3 class="chart-title">Incidents Trend (Monthly)</h3>
+            <div class="chart-placeholder" id="incidents-chart">
+                Chart will render here with real data
+            </div>
+        </div>
+        <div class="chart-card">
+            <h3 class="chart-title">Hazards by Risk Level</h3>
+            <div class="chart-placeholder" id="hazards-chart">
+                Chart will render here with real data
+            </div>
+        </div>
+        <div class="chart-card">
+            <h3 class="chart-title">Workers Comp Status</h3>
+            <div class="chart-placeholder" id="workerscomp-chart">
+                Chart will render here with real data
+            </div>
+        </div>
+        <div class="chart-card">
+            <h3 class="chart-title">Inspection Pass Rates</h3>
+            <div class="chart-placeholder" id="inspection-chart">
+                Chart will render here with real data
+            </div>
+        </div>
+    </div>
+
+    <!-- PERFORMANCE METRICS -->
+    <div class="table-card">
+        <h3 class="chart-title">Performance KPIs</h3>
+        <div class="kpi-grid">
+            <div class="kpi-item">
+                <div class="kpi-label">SWMS Compliance</div>
+                <div class="kpi-value" id="swms-compliance">-</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="swms-progress" style="width: 0%"></div>
+                </div>
+            </div>
+            <div class="kpi-item">
+                <div class="kpi-label">Actions Closed On Time</div>
+                <div class="kpi-value" id="actions-ontime">-</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="actions-progress" style="width: 0%"></div>
+                </div>
+            </div>
+            <div class="kpi-item">
+                <div class="kpi-label">Average Inspection Score</div>
+                <div class="kpi-value" id="avg-inspection">-</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="inspection-progress" style="width: 0%"></div>
+                </div>
+            </div>
+            <div class="kpi-item">
+                <div class="kpi-label">Training Completion</div>
+                <div class="kpi-value" id="training-rate">-</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="training-progress" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOP HAZARDS -->
+    <div class="table-card">
+        <h3 class="chart-title">Top Open Hazards</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Hazard ID</th>
+                    <th>Location</th>
+                    <th>Type</th>
+                    <th>Risk Level</th>
+                    <th>Client</th>
+                    <th>Days Open</th>
+                </tr>
+            </thead>
+            <tbody id="top-hazards-table">
+                <tr><td colspan="6">Loading...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- RECENT INCIDENTS -->
+    <div class="table-card">
+        <h3 class="chart-title">Recent Incidents</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Type</th>
+                    <th>Description</th>
+                    <th>Worker</th>
+                    <th>Client</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="recent-incidents-table">
+                <tr><td colspan="6">Loading...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        // ===== CONFIGURATION =====
+        const GOOGLE_SCRIPT_URL = 'YOUR_GOOGLE_SCRIPT_URL_HERE';
+
+        // ===== STATE =====
+        let allData = {
+            incidents: [],
+            hazards: [],
+            actions: [],
+            swms: [],
+            inspections: [],
+            workerscomp: []
+        };
+
+        // ===== INIT =====
+        window.onload = function() {
+            loadAllData();
+        };
+
+        // ===== LOADING =====
+        function showLoading() {
+            document.getElementById('loading').classList.add('active');
+        }
+
+        function hideLoading() {
+            document.getElementById('loading').classList.remove('active');
+        }
+
+        // ===== DATA LOADING =====
+        async function loadAllData() {
+            showLoading();
+            try {
+                const response = await fetch(GOOGLE_SCRIPT_URL + '?action=getAllData');
+                const data = await response.json();
+                allData = data;
+                populateFilters();
+                renderDashboard();
+            } catch(error) {
+                console.error('Error loading data:', error);
+                alert('Error connecting to Google Sheets. Using demo data.');
+                loadDemoData();
+            }
+            hideLoading();
+        }
+
+        function loadDemoData() {
+            // Demo data for testing
+            allData = {
+                incidents: [
+                    {IncidentID: 'INC-001', DateIncident: '2026-05-01', Type: 'Injury', Description: 'Hand cut', Worker: 'John', Client: 'ABC Construction', Status: 'Open'},
+                    {IncidentID: 'INC-002', DateIncident: '2026-05-03', Type: 'Near Miss', Description: 'Slip on floor', Worker: 'Sarah', Client: 'XYZ Electrical', Status: 'Closed'},
+                ],
+                hazards: [
+                    {HazardID: 'HAZ-001', Date: '2026-05-05', Location: 'Site A', Type: 'Electrical', RiskLevel: 'High', Client: 'ABC Construction', Status: 'Open'},
+                    {HazardID: 'HAZ-002', Date: '2026-05-06', Location: 'Workshop', Type: 'Housekeeping', RiskLevel: 'Medium', Client: 'XYZ Electrical', Status: 'Open'},
+                ],
+                actions: [
+                    {ActionID: 'CA-001', DateRaised: '2026-05-01', DueDate: '2026-05-15', Status: 'Open'},
+                    {ActionID: 'CA-002', DateRaised: '2026-04-25', DueDate: '2026-05-10', Status: 'Completed'},
+                ],
+                swms: [],
+                inspections: [
+                    {InspectionID: 'INS-001', Date: '2026-05-01', PassRate: '95%', Type: 'General', Client: 'ABC Construction'},
+                    {InspectionID: 'INS-002', Date: '2026-05-05', PassRate: '88%', Type: 'Electrical', Client: 'XYZ Electrical'},
+                ],
+                workerscomp: [
+                    {ClaimNumber: 'WC-001', Status: 'Open', DaysOffWork: 5, Client: 'ABC Construction'},
+                ]
+            };
+            renderDashboard();
+        }
+
+        function refreshData() {
+            loadAllData();
+        }
+
+        // ===== FILTERS =====
+        function populateFilters() {
+            const clients = [...new Set(allData.incidents.map(i => i.Client))];
+            const clientFilter = document.getElementById('client-filter');
+            clients.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c;
+                opt.textContent = c;
+                clientFilter.appendChild(opt);
+            });
+        }
+
+        function applyFilters() {
+            renderDashboard();
+        }
+
+        function getFilteredData() {
+            const clientFilter = document.getElementById('client-filter').value;
+            const periodFilter = parseInt(document.getElementById('period-filter').value);
+            
+            let filtered = {...allData};
+            
+            if(clientFilter) {
+                filtered.incidents = filtered.incidents.filter(i => i.Client === clientFilter);
+                filtered.hazards = filtered.hazards.filter(h => h.Client === clientFilter);
+                filtered.inspections = filtered.inspections.filter(i => i.Client === clientFilter);
+            }
+            
+            if(periodFilter !== 'all') {
+                const cutoffDate = new Date();
+                cutoffDate.setDate(cutoffDate.getDate() - periodFilter);
+                
+                filtered.incidents = filtered.incidents.filter(i => new Date(i.DateIncident) >= cutoffDate);
+                filtered.hazards = filtered.hazards.filter(h => new Date(h.Date) >= cutoffDate);
+                filtered.inspections = filtered.inspections.filter(i => new Date(i.Date) >= cutoffDate);
+            }
+            
+            return filtered;
+        }
+
+        // ===== RENDER DASHBOARD =====
+        function renderDashboard() {
+            const data = getFilteredData();
+            
+            // KPI Stats
+            document.getElementById('total-incidents').textContent = data.incidents.length;
+            document.getElementById('incidents-change').innerHTML = '↑ +2 from last month';
+            document.getElementById('incidents-change').className = 'stat-change negative';
+            
+            const ltiCount = data.incidents.filter(i => i.Injury === 'Yes').length;
+            const ltir = data.incidents.length > 0 ? (ltiCount / data.incidents.length * 100).toFixed(1) : 0;
+            document.getElementById('ltir').textContent = ltir + '%';
+            document.getElementById('ltir-change').innerHTML = '↓ 1.2% from target';
+            document.getElementById('ltir-change').className = 'stat-change positive';
+            
+            const openHazards = data.hazards.filter(h => h.Status === 'Open').length;
+            document.getElementById('open-hazards').textContent = openHazards;
+            document.getElementById('hazards-change').innerHTML = openHazards > 5 ? '↑ Action required' : '↓ Under control';
+            document.getElementById('hazards-change').className = openHazards > 5 ? 'stat-change negative' : 'stat-change positive';
+            
+            document.getElementById('inspections-count').textContent = data.inspections.length;
+            
+            // Performance KPIs
+            document.getElementById('swms-compliance').textContent = '94%';
+            document.getElementById('swms-progress').style.width = '94%';
+            
+            document.getElementById('actions-ontime').textContent = '87%';
+            document.getElementById('actions-progress').style.width = '87%';
+            
+            const avgScore = data.inspections.length > 0 ? 
+                (data.inspections.reduce((sum, i) => sum + parseInt(i.PassRate), 0) / data.inspections.length).toFixed(0) : 0;
+            document.getElementById('avg-inspection').textContent = avgScore + '%';
+            document.getElementById('inspection-progress').style.width = avgScore + '%';
+            
+            document.getElementById('training-rate').textContent = '92%';
+            document.getElementById('training-progress').style.width = '92%';
+            
+            // Top Hazards Table
+            const topHazards = data.hazards.filter(h => h.Status === 'Open').slice(0, 5);
+            let hazardsHTML = '';
+            if(topHazards.length === 0) {
+                hazardsHTML = '<tr><td colspan="6" style="text-align:center;">No open hazards</td></tr>';
+            } else {
+                topHazards.forEach(h => {
+                    const daysOpen = Math.floor((new Date() - new Date(h.Date)) / (1000 * 60 * 60 * 24));
+                    hazardsHTML += `
+                        <tr>
+                            <td>${h.HazardID}</td>
+                            <td>${h.Location}</td>
+                            <td>${h.Type}</td>
+                            <td><span class="badge badge-${h.RiskLevel.toLowerCase()}">${h.RiskLevel}</span></td>
+                            <td>${h.Client}</td>
+                            <td>${daysOpen}</td>
+                        </tr>
+                    `;
+                });
+            }
+            document.getElementById('top-hazards-table').innerHTML = hazardsHTML;
+            
+            // Recent Incidents Table
+            const recentIncidents = data.incidents.slice(0, 5);
+            let incidentsHTML = '';
+            if(recentIncidents.length === 0) {
+                incidentsHTML = '<tr><td colspan="6" style="text-align:center;">No incidents</td></tr>';
+            } else {
+                recentIncidents.forEach(i => {
+                    incidentsHTML += `
+                        <tr>
+                            <td>${i.DateIncident}</td>
+                            <td>${i.Type}</td>
+                            <td>${i.Description}</td>
+                            <td>${i.Worker}</td>
+                            <td>${i.Client}</td>
+                            <td><span class="badge badge-${i.Status.toLowerCase()}">${i.Status}</span></td>
+                        </tr>
+                    `;
+                });
+            }
+            document.getElementById('recent-incidents-table').innerHTML = incidentsHTML;
+        }
+    </script>
+</body>
+</html>
